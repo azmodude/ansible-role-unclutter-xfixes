@@ -1,0 +1,26 @@
+---
+unclutter_requirements:
+  Ubuntu:
+    - libxi6
+    - libev4
+  Fedora:
+    - libXi
+    - libev
+
+unclutter_build_requirements:
+  Ubuntu:
+    - libxi-dev
+    - libev-dev
+  Fedora:
+    - libXi-devel
+    - libev-devel
+
+common_build_requirements:
+  Ubuntu:
+    - build-essential
+    - asciidoc-base
+  Fedora:
+    - "@Development Tools"
+    - asciidoc
+
+unclutter_remove_build_requirements: true

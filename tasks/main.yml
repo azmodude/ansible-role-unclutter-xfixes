@@ -1,0 +1,45 @@
+---
+- name: Check whether unclutter is already present on the system
+  stat:
+    path: /usr/local/bin/unclutter
+  register: unclutter_installed
+
+- name: Only run when unclutter is not installed
+  block:
+    - name: Install (build) requirements
+      block:
+        - name: Install requirements
+          package:
+            name: "{{ unclutter_requirements[ansible_distribution] }}"
+        - name: Install build requirements
+          package:
+            name: "{{ unclutter_build_requirements[ansible_distribution] }}"
+        - name: Install common build requirements
+          package:
+            name: "{{ common_build_requirements[ansible_distribution] }}"
+      become: true
+
+    - name: Clone unclutter repository
+      git:
+        clone: true
+        dest: /tmp/unclutter-git
+        repo: https://github.com/Airblader/unclutter-xfixes
+    - name: Build unclutter
+      command: make -j{{ ansible_processor_vcpus }} PREFIX=/usr/local install
+      args:
+        chdir: /tmp/unclutter-git
+        creates: /usr/local/bin/unclutter
+      become: true
+    - name: Clean git checkout directory
+      file:
+        state: absent
+        path: /tmp/unclutter-git
+      become: true
+
+    - name: Remove build requirements
+      package:
+        name: "{{ unclutter_build_requirements[ansible_distribution] }}"
+        state: absent
+      become: true
+      when: unclutter_remove_build_requirements
+  when: not unclutter_installed.stat.exists
